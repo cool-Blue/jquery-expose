@@ -1,0 +1,17 @@
+{
+  "name": "shimwindow",
+  "version": "1.0.0",
+  "description": "use node-jsdom 6to shim a window object in node",
+  "main": "shimWindow.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "node-jsdom": "^3.1.5"
+  },
+  "author": "cool.blue",
+  "license": "MIT",
+  "devDependencies": {
+    "jsdom": "^9.4.1"
+  }
+}

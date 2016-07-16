@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>jquery.expose with browserify</title>
+    <style>
+        body {
+            position: relative;
+            margin: 0;
+            /*padding: 0;*/
+        }
+        .test-div {
+            position: absolute;
+            background-color: darksalmon;
+        }
+        .exposed {
+            z-index: 10000;
+            box-shadow: 2px 2px 2px 1px rgba(0, 0, 10, 0.6);
+        }
+        .expose-overlay, .fading-overlay {
+            background:rgba(0,0,0,0.6);
+            transition: all 500ms ease;
+            z-index: 9999;
+            outline: 1px red;
+        }
+        .pre-expose-overlay {
+            background:rgba(0,0,0,0);
+        }
+    </style>
+</head>
+<body>
+<div style="white-space: pre;" id="output"></div>
+<script type="text/javascript" src="bundle.js"></script>
+
+</body>
+</html>

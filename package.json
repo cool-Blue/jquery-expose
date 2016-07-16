@@ -1,0 +1,31 @@
+{
+  "name": "jquery-expose",
+  "version": "1.0.0",
+  "description": "experimint with browserify",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "browserify ./index.js -u jsdom | js-beautify > ./bundle.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cool-Blue/jquery-expose.git"
+  },
+  "keywords": [
+    "jQuery",
+    "plugin",
+    "browserify"
+  ],
+  "author": "cool.blue",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cool-Blue/jquery-expose/issues"
+  },
+  "homepage": "https://github.com/cool-Blue/jquery-expose#readme",
+  "dependencies": {
+    "jquery": "^3.1.0"
+  },
+  "devDependencies": {
+    "commonjsify": "^0.1.4"
+  }
+}

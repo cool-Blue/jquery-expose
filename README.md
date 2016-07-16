@@ -28,7 +28,36 @@ $(".some_selector").expose();
 }
 ```
 
-It's that easy!  The plugin will create absolutely positioned 
+Clicking anywhere on the overlay will remove it.
+It's that easy!  The plugin will create absolutely positioned
+## Hover Example
+```js
+$(".some_selector").hover(
+    function over(evt) {
+        $(this).expose();
+        evt.preventDefault();
+        console.log("hover")
+    },
+    function out (evt) {
+        $(window.document).trigger("expose:hide");
+        evt.preventDefault();
+    });
+    $("body")
+        // manage the class of the exposed element to provide styling opportunity
+        .on("expose:init", function(e, params){
+            $(params[0]).addClass("exposed")
+        })
+        .on("expose:overlay:removed", function() {
+            $(".exposed").removeClass("exposed");
+        })
+        // clean up if an element is stuck in exposed state
+        .on("expose:overlay:shown", function(e, x0, y0, x1, y1, overlay) {
+            overlay.mousemove(function(){
+                console.log("overlay mousemove");
+                $(window.document).trigger("expose:hide");
+            });
+        });
+```
 
 ## Options
 
