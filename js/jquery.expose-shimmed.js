@@ -1,15 +1,35 @@
-/**
- * jquery.expose.js
- * Original version.
+var globals = require("../index.js"),
+    jQuery = globals.$,
+    document = globals.window.document;
+/*
+ * jQuery Expose plugin 1.0
+ * Copyright (c) 2013 Jeff Ching
+ *
+ * http://github.com/chingor13/jquery-expose
+ *
+ * Depends:
+ *   - jQuery 1.4.2+
+ * *
+ * Licensed under the MIT license
+ *   http://www.opensource.org/licenses/mit-license.php
+ *
  */
 (function($){
+    var preClass = "pre-expose-overlay";
+
     function removeOverlays() {
-        $('.overlay').remove();
-        $("body").trigger("expose:overlay:removed");
+        var $overlay = $('.expose-overlay');
+        $overlay
+            .toggleClass('expose-overlay')
+            .toggleClass('fading-overlay')
+            .fadeOut(400, function(){
+                $overlay.remove();
+                $("body").trigger("expose:overlay:removed");
+            });
     }
 
     function showOverlay(x0, y0, x1, y1, options) {
-        var overlay = $('<div class="overlay"></div>').css({
+        var overlay = $('<div class="'+preClass+'"></div>').css({
             position: 'absolute',
             top: y0 + 'px',
             left: x0 + 'px',
@@ -96,7 +116,14 @@
             }
         }
 
-        $("body").trigger("expose:shown", this);
+        var requestFrame = (requestAnimationFrame ? requestAnimationFrame : setInterval);
+        requestFrame(function(){
+            requestFrame(function(){
+                $("."+preClass).removeClass(preClass).addClass(preClass.replace("pre-", ""));
+                $("body").trigger("expose:shown", this);
+            }.bind(this), 60)
+        }.bind(this), 60);
+
         return this;
     };
 

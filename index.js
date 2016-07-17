@@ -9,8 +9,7 @@ module.exports.window = require("./shimwindow/shimWindow")(_jquery, function($, 
     _jquery = $;
     module.exports.jQuery = module.exports.$ = _jquery;
     module.exports.window = w = w || window;
-    require("./js/jquery.expose.js");
-    // require("./js/bsfyExpose.js");
+    require("./js/jquery.expose-shimmed.js");
     main(_jquery, w)
 }, docPath, `trans_${docPath}`);
 
