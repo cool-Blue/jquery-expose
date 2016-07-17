@@ -2,9 +2,10 @@ jquery-expose with browserify
 =============================
 
 ### Features
-1.  jQuery included in the bundle
+1.  _jQuery_ included in the bundle
 1.  plugin included in the bundle
 1.  no pollution of the `window` object
+1.  use _jsdom_ to shim the the window object to make it isomorphic
 
 ### Config
 
@@ -14,12 +15,11 @@ In _./package.json_, add a `browser` node to create aliases for the resource loc
 {
   "main": "app.cb.js",
   "scripts": {
-    "build": "browserify ./app.cb.js > ./app.cb.bundle.js"
+    "build": "browserify ./app.cb.js -u jsdom | js-beautify > ./app.cb.bundle.js"
   },
   "browser": {
     "jquery": "./node_modules/jquery/dist/jquery.js",
-    "expose": "./js/jquery.expose.js",
-    "app": "./app.cb.js"
+    "shimWindow": "./node_modules/shimwindow/shimWindow.js"
   },
   "browserify-shim": {
   },
@@ -43,60 +43,93 @@ In _./package.json_, add a `browser` node to create aliases for the resource loc
 ### Method
  * Because jQuery is CommonJS-aware these days, it will sense the presence of the `module` object provided by _browserify_ and return an instance, without adding it to the `window` object.
  * In the app, `require` jquery and add it to the `module.exports` object (along with any other context that needs to be shared).
- * Add a single line at the start of the plugin to require the app to access the jQuery instance it created.
- * In the app, copy the jQuery instance to `$` and use jQuery with the plugin.
- * Browserify the app, with default options, and drop the resulting bundle into a script tag in your HTML.
+ * Add three lines at the start of the plugin to environment created in the app.
+ * In the app, shim a window object if necessary, copy the jQuery instance to `$` and use jQuery with the plugin.
+ * _browserify_ the app, with _jsdom_ excluded (since it's not needed in the browser bundle), and drop the resulting bundle into a script tag in your HTML.
  
 ### Code
  app.cb
  ```js
-module.exports.jQuery = require("jquery");
-require('expose');
+const docPath = 'index.html';
+var $ = require("jquery");
 
-var $ = module.exports.jQuery;
+module.exports.window = require("shimWindow")($,
+    function(ns){
+        return typeof ns === 'function' && ns["fn"]
+    },
+    function($, w) {
+    module.exports.jQuery = module.exports.$ = $;
+    module.exports.window = w = w || window;
+    require("./js/jquery.expose.js");
+    main($, w)
+}, docPath, `trans_${docPath}`);
 
-$(document).ready(function() {
+function main ($, window){
+    $(window.document).ready(function() {
 
-    $('body').append(
-        $('<button name="button" >Click me</button>')
-            .css({"position": "relative",
-                  "top": "100px", "left": "100px"})
-            .click(function() {
-                $(this).expose();
-            })
-    );
-});
+        $('body').append(
+            $('<button name="button" >Click me</button>')
+                .css({
+                    "position": "relative",
+                    "top": "100px", "left": "100px"
+                })
+                .click(function() {
+                    $(this).expose();
+                })
+        );
+    })
+}
 ```
 at the top of the plugin
 ```js
-var jQuery = require("app").jQuery;
+var globals = require("./../app.cb.js"),
+    jQuery = globals.jQuery,
+    document = globals.window.document;
 ```
 in the HTML
 ```html
     <script type="text/javascript" src="app.cb.bundle.js"></script>
 ```
-### Background
-The pattern used by jQuery is to call it's factory with a `noGlobal` flag if it senses a CommonJS environment.
+### shimWindow
+In order to make the code isomorphic, use _jsdom_ to provide a dummy environment. 
 ```js
-( function( global, factory ) {
+module.exports = function(_ns, test, main, docPath, outDocPath) {
+    var t;
+    if(test(_ns)) {
+        /**
+         * Check if this is the namespace, otherwise fall back on
+         * window.ns
+         *
+         * run the app
+         */
+        _ns = Object.keys(_ns).length ? _ns : ns;
+        main(_ns);
+    } else if(typeof _ns === 'function') {
+        /**
+         * if a function is returned, assume it is asking for a window object
+         * assume that the callback returns the window object decorated with the exported
+         * namespace.
+         * This is the behaviour in node, this code is dead in the browser and simple-jsdom
+         * needs to be --ignore 'ed, --exclude 'ed
+         *
+         * run the app
+         **/
 
-	"use strict";
+        docPath = docPath || 'index.html';
 
-	if ( typeof module === "object" && typeof module.exports === "object" ) {
-		module.exports = factory( global, true ) :
-	} else {
-		factory( global );
-	}
+        var fs    = require("fs"),
+            jsdom = require('jsdom'),
+            doc   = fs.readFileSync(docPath, 'utf8');
 
-// Pass this if window is not defined yet
-} )( typeof window !== "undefined" ? window : this, function( window, noGlobal ) {
-
-// ...
-
-if ( !noGlobal ) {
-	window.jQuery = window.$ = jQuery;
-}
-
-return jQuery;
-}) );
-```
+        jsdom.env(
+            doc,
+            function(err, window) {
+                main(_ns(window), window);
+                console.log(`HTML: \n ${window.document.documentElement.outerHTML}`);
+                if(outDocPath)
+                    fs.writeFile(outDocPath, window.document.documentElement.outerHTML);
+                console.log(`\noutput: \n ${window.document.getElementById("output").textContent}`);
+            }
+        )
+    }
+};```

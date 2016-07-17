@@ -6,7 +6,22 @@
 /*
 * Just add this line and export from app
 * */
-var jQuery = require("app").jQuery;
+var globals = require("./../app.cb.js"),
+    jQuery = globals.jQuery,
+    document = globals.window.document;
+/*
+ * jQuery Expose plugin 1.0
+ * Copyright (c) 2013 Jeff Ching
+ *
+ * http://github.com/chingor13/jquery-expose
+ *
+ * Depends:
+ *   - jQuery 1.4.2+
+ * *
+ * Licensed under the MIT license
+ *   http://www.opensource.org/licenses/mit-license.php
+ *
+ */
 
 (function($){
     function removeOverlays() {
