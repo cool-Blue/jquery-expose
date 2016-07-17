@@ -2,10 +2,10 @@
   "name": "jquery-expose",
   "version": "1.0.0",
   "description": "experimint with browserify",
-  "main": "index.js",
+  "main": "app.cb.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "browserify ./index.js -u jsdom | js-beautify > ./bundle.js"
+    "build": "browserify ./app.cb.js | js-beautify > ./app.cb.bundle.js"
   },
   "repository": {
     "type": "git",
@@ -16,6 +16,18 @@
     "plugin",
     "browserify"
   ],
+  "browser": {
+    "jquery": "./node_modules/jquery/dist/jquery.js",
+    "expose": "./js/jquery.expose.js",
+    "app": "./app.cb.js"
+  },
+  "browserify-shim": {
+  },
+  "browserify": {
+    "transform": [
+      "browserify-shim"
+    ]
+  },
   "author": "cool.blue",
   "license": "MIT",
   "bugs": {
@@ -26,6 +38,7 @@
     "jquery": "^3.1.0"
   },
   "devDependencies": {
-    "commonjsify": "^0.1.4"
+    "browserify": "^13.0.1",
+    "browserify-shim": "^3.8.12"
   }
 }

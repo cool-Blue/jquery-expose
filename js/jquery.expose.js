@@ -1,7 +1,13 @@
 /**
  * jquery.expose.js
- * Original version.
+ * shimmed version.
  */
+
+/*
+* Just add this line and export from app
+* */
+var jQuery = require("app").jQuery;
+
 (function($){
     function removeOverlays() {
         $('.overlay').remove();

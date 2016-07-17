@@ -1,134 +1,102 @@
-jquery-expose
-=============
+jquery-expose with browserify
+=============================
 
-Create a modal backdrop over everything except specified exposed elements
+### Features
+1.  jQuery included in the bundle
+1.  plugin included in the bundle
+1.  no pollution of the `window` object
 
-## TL;DR
+### Config
 
-[Example](http://chingor13.github.io/jquery-expose/example.html)
+In _./package.json_, add a `browser` node to create aliases for the resource locations.  This is purely for convenience, there is no need to actually shim anything because there is no communications between the module and the global space (script tags).  You need to include an empty config node to keep _browserify-shim_ happy.
 
-## Motivation
-
-Sometimes you want to highlight elements on a page.  There are many techniques out there will but a backdrop over the entire document and try to bring elements to the forefront via relative positioning and z-indexes.  This can fail for many display types (individual table rows, fixed position elements). Additionally, you have to ensure that the element will stand out in front of the backdrop (white background or something similar).
-
-To get around this, instead of highlighting the element, we will obscure everything else on the page except the elements that we want to show through.
-
-This algorithm is O(n^2), but for most applications n will be small and will only be run a few times at most on a page.
-
-## Basic Usage
-
-```
-// in your javascript somewhere
-$(".some_selector").expose();
-
-// in your css somewhere
-.expose-overlay {
-  background:rgba(0,0,0,0.6);  // whatever you want
-  z-index: 9999;				// whatever you want
+```js
+{
+  "main": "app.cb.js",
+  "scripts": {
+    "build": "browserify ./app.cb.js > ./app.cb.bundle.js"
+  },
+  "browser": {
+    "jquery": "./node_modules/jquery/dist/jquery.js",
+    "expose": "./js/jquery.expose.js",
+    "app": "./app.cb.js"
+  },
+  "browserify-shim": {
+  },
+  "browserify": {
+    "transform": [
+      "browserify-shim"
+    ]
+  },
+  "author": "cool.blue",
+  "license": "MIT",
+  "dependencies": {
+    "jquery": "^3.1.0"
+  },
+  "devDependencies": {
+    "browserify": "^13.0.1",
+    "browserify-shim": "^3.8.12"
+  }
 }
 ```
 
-Clicking anywhere on the overlay will remove it.
-It's that easy!  The plugin will create absolutely positioned
-## Hover Example
+### Method
+ * Because jQuery is CommonJS-aware these days, it will sense the presence of the `module` object provided by _browserify_ and return an instance, without adding it to the `window` object.
+ * In the app, `require` jquery and add it to the `module.exports` object (along with any other context that needs to be shared).
+ * Add a single line at the start of the plugin to require the app to access the jQuery instance it created.
+ * In the app, copy the jQuery instance to `$` and use jQuery with the plugin.
+ * Browserify the app, with default options, and drop the resulting bundle into a script tag in your HTML.
+ 
+### Code
+ app.cb
+ ```js
+module.exports.jQuery = require("jquery");
+require('expose');
+
+var $ = module.exports.jQuery;
+
+$(document).ready(function() {
+
+    $('body').append(
+        $('<button name="button" >Click me</button>')
+            .css({"position": "relative",
+                  "top": "100px", "left": "100px"})
+            .click(function() {
+                $(this).expose();
+            })
+    );
+});
+```
+at the top of the plugin
 ```js
-$(".some_selector").hover(
-    function over(evt) {
-        $(this).expose();
-        evt.preventDefault();
-        console.log("hover")
-    },
-    function out (evt) {
-        $(window.document).trigger("expose:hide");
-        evt.preventDefault();
-    });
-    $("body")
-        // manage the class of the exposed element to provide styling opportunity
-        .on("expose:init", function(e, params){
-            $(params[0]).addClass("exposed")
-        })
-        .on("expose:overlay:removed", function() {
-            $(".exposed").removeClass("exposed");
-        })
-        // clean up if an element is stuck in exposed state
-        .on("expose:overlay:shown", function(e, x0, y0, x1, y1, overlay) {
-            overlay.mousemove(function(){
-                console.log("overlay mousemove");
-                $(window.document).trigger("expose:hide");
-            });
-        });
+var jQuery = require("app").jQuery;
 ```
-
-## Options
-
-There are 2 options available at this time:
-
-* `padding` (numeric) - adding padding to all elements in your set
-* `static` (boolean) - if set, don't hide the overlays when you click on one. you will have to remove the elements yourself.
-
-Example:
-
+in the HTML
+```html
+    <script type="text/javascript" src="app.cb.bundle.js"></script>
 ```
-$("a").expose({
-  padding: 5,
-  static: true
-});
-```
+### Background
+The pattern used by jQuery is to call it's factory with a `noGlobal` flag if it senses a CommonJS environment.
+```js
+( function( global, factory ) {
 
-## Events
+	"use strict";
 
-There are several events that are triggered at various stages of rendering:
+	if ( typeof module === "object" && typeof module.exports === "object" ) {
+		module.exports = factory( global, true ) :
+	} else {
+		factory( global );
+	}
 
-* `expose:init` - nothing has been rendered yet
-* `expose:shown` - rendering is complete
-* `expose:overlay:shown` - fired for each backdrop element created
-* `expose:overlay:removed` - fired after all backdrop elements have been removed
+// Pass this if window is not defined yet
+} )( typeof window !== "undefined" ? window : this, function( window, noGlobal ) {
 
-## Handling Browser Resize
+// ...
 
-Simple technique:
+if ( !noGlobal ) {
+	window.jQuery = window.$ = jQuery;
+}
 
-```
-(function(){
-  var currentOptions, currentSelector;
-
-  // re-init exposed view when the window resizes
-  $(window).resize(function() {
-    if(currentSelector) {
-      currentSelector.expose(currentOptions);
-    }
-  });
-
-  $("body").bind("expose:init", function(evt, els, options){
-    currentSelector = els;
-    currentOptions = options;
-  }).bind("expose:overlay:removed", function(evt) {
-    currentSelector = null;
-    currentOptions = null;
-  });
-});
-```
-
-The problem with this is that many browsers fire resize many times while you drag. To solve this, we can use [jquery-debounce](https://github.com/cowboy/jquery-throttle-debounce):
-
-```
-$(function(){
-  var currentOptions, currentSelector;
-
-  // re-init exposed view when the window resizes
-  $(window).resize($.debounce(300, function() {
-    if(currentSelector) {
-      currentSelector.expose(currentOptions);
-    }
-  }));
-
-  $("body").bind("expose:init", function(evt, els, options){
-    currentSelector = els;
-    currentOptions = options;
-  }).bind("expose:overlay:removed", function(evt) {
-    currentSelector = null;
-    currentOptions = null;
-  });
-
-});
+return jQuery;
+}) );
 ```
