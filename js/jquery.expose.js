@@ -6,7 +6,7 @@
 /*
 * Just add this line and export from app
 * */
-var globals = require("./../app.cb.js"),
+var globals = require("app"),
     jQuery = globals.jQuery,
     document = globals.window.document;
 /*
