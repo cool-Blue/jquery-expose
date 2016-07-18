@@ -20,13 +20,6 @@
     "jquery": "./node_modules/jquery/dist/jquery.js",
     "shimWindow": "./node_modules/shimwindow/shimWindow.js"
   },
-  "browserify-shim": {
-  },
-  "browserify": {
-    "transform": [
-      "browserify-shim"
-    ]
-  },
   "author": "cool.blue",
   "license": "MIT",
   "bugs": {

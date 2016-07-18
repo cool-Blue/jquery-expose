@@ -9,7 +9,7 @@ jquery-expose with browserify
 
 ### Config
 
-In _./package.json_, add a `browser` node to create aliases for the resource locations.  This is purely for convenience, there is no need to actually shim anything because there is no communications between the module and the global space (script tags).  You need to include an empty config node to keep _browserify-shim_ happy.
+In _./package.json_, add a `browser` node to create aliases for the resource locations.  This is purely for convenience, there is no need to actually shim anything because there is no communications between the module and the global space (script tags).
 
 ```js
 {
@@ -20,13 +20,6 @@ In _./package.json_, add a `browser` node to create aliases for the resource loc
   "browser": {
     "jquery": "./node_modules/jquery/dist/jquery.js",
     "shimWindow": "./node_modules/shimwindow/shimWindow.js"
-  },
-  "browserify-shim": {
-  },
-  "browserify": {
-    "transform": [
-      "browserify-shim"
-    ]
   },
   "author": "cool.blue",
   "license": "MIT",
@@ -132,4 +125,5 @@ module.exports = function(_ns, test, main, docPath, outDocPath) {
             }
         )
     }
-};```
+};
+```
