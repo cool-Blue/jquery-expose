@@ -18,15 +18,8 @@
   ],
   "browser": {
     "jquery": "./node_modules/jquery/dist/jquery.js",
-    "expose": "./js/jquery.expose.js",
+    "expose": "./js/jquery.expose-shimmed.js",
     "app": "./app.cb.js"
-  },
-  "browserify-shim": {
-  },
-  "browserify": {
-    "transform": [
-      "browserify-shim"
-    ]
   },
   "author": "cool.blue",
   "license": "MIT",
@@ -35,10 +28,14 @@
   },
   "homepage": "https://github.com/cool-Blue/jquery-expose#readme",
   "dependencies": {
+    "angular": "^1.5.7",
     "jquery": "^3.1.0"
   },
   "devDependencies": {
     "browserify": "^13.0.1",
-    "browserify-shim": "^3.8.12"
+    "browserify-shim": "^3.8.12",
+    "commonjsify": "^0.1.4",
+    "gulp": "^3.9.1",
+    "gulp-util": "^3.0.7"
   }
 }

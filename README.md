@@ -8,7 +8,7 @@ jquery-expose with browserify
 
 ### Config
 
-In _./package.json_, add a `browser` node to create aliases for the resource locations.  This is purely for convenience, there is no need to actually shim anything because there is no communications between the module and the global space (script tags).  You need to include an empty config node to keep _browserify-shim_ happy.
+In _./package.json_, add a `browser` node to create aliases for the resource locations.  **This is purely for convenience, there is no need to actually shim anything because there is no communications between the module and the global space (script tags)**.
 
 ```js
 {
@@ -20,13 +20,6 @@ In _./package.json_, add a `browser` node to create aliases for the resource loc
     "jquery": "./node_modules/jquery/dist/jquery.js",
     "expose": "./js/jquery.expose.js",
     "app": "./app.cb.js"
-  },
-  "browserify-shim": {
-  },
-  "browserify": {
-    "transform": [
-      "browserify-shim"
-    ]
   },
   "author": "cool.blue",
   "license": "MIT",
@@ -76,14 +69,23 @@ in the HTML
     <script type="text/javascript" src="app.cb.bundle.js"></script>
 ```
 ### Background
-The pattern used by jQuery is to call it's factory with a `noGlobal` flag if it senses a CommonJS environment.
+The pattern used by jQuery is to call it's factory with a `noGlobal` flag if it senses a CommonJS environment.  It will not add an instance to the `window` object and will return an instance as always.
+
+The CommonJS context is created by *browserify* by default.  Below is an abridged extract from the bundle showing the jQuery module structure.  It also handles managing the `window` object in non-browser contexts to allow for isomorphic aplications.  This is exploited in an isomorphic version on the [shimmed-window](https://github.com/cool-Blue/jquery-expose/tree/shimmed-window) branch of this repo.
 ```js
 ( function( global, factory ) {
 
 	"use strict";
 
 	if ( typeof module === "object" && typeof module.exports === "object" ) {
-		module.exports = factory( global, true ) :
+        module.exports = global.document ?
+            factory(global, true) :
+            function(w) {
+                if (!w.document) {
+                    throw new Error("jQuery requires a window with a document");
+                }
+                return factory(w);
+            };
 	} else {
 		factory( global );
 	}

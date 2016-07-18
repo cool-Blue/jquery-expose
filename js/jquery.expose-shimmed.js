@@ -1,6 +1,7 @@
-var globals = require("../index.js"),
-    jQuery = globals.$,
-    document = globals.window.document;
+/*
+ * Just add this line and export from app
+ * */
+var jQuery = require("app").jQuery;
 /*
  * jQuery Expose plugin 1.0
  * Copyright (c) 2013 Jeff Ching
@@ -15,21 +16,13 @@ var globals = require("../index.js"),
  *
  */
 (function($){
-    var preClass = "pre-expose-overlay";
-
     function removeOverlays() {
-        var $overlay = $('.expose-overlay');
-        $overlay
-            .toggleClass('expose-overlay')
-            .toggleClass('fading-overlay')
-            .fadeOut(400, function(){
-                $overlay.remove();
-                $("body").trigger("expose:overlay:removed");
-            });
+        $('.overlay').remove();
+        $("body").trigger("expose:overlay:removed");
     }
 
     function showOverlay(x0, y0, x1, y1, options) {
-        var overlay = $('<div class="'+preClass+'"></div>').css({
+        var overlay = $('<div class="overlay"></div>').css({
             position: 'absolute',
             top: y0 + 'px',
             left: x0 + 'px',
@@ -116,14 +109,7 @@ var globals = require("../index.js"),
             }
         }
 
-        var requestFrame = (requestAnimationFrame ? requestAnimationFrame : setInterval);
-        requestFrame(function(){
-            requestFrame(function(){
-                $("."+preClass).removeClass(preClass).addClass(preClass.replace("pre-", ""));
-                $("body").trigger("expose:shown", this);
-            }.bind(this), 60)
-        }.bind(this), 60);
-
+        $("body").trigger("expose:shown", this);
         return this;
     };
 
