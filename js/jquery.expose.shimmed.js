@@ -1,6 +1,14 @@
 /**
- * Created by Admin on 19/07/2016.
+ * jquery.expose.js
+ * shimmed version.
  */
+
+/*
+* Just add this line and export from app
+* */
+var globals = require("app"),
+    jQuery = globals.jQuery,
+    document = globals.window.document;
 /*
  * jQuery Expose plugin 1.0
  * Copyright (c) 2013 Jeff Ching

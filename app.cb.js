@@ -4,14 +4,14 @@
 const docPath = 'index.html';
 var $ = require("jquery");
 
-module.exports.window = require("shimWindow")($,
+module.exports.window = require("shimwindow")($,
     function(ns){
         return typeof ns === 'function' && ns["fn"]
     },
     function($, w) {
     module.exports.jQuery = module.exports.$ = $;
     module.exports.window = w = w || window;
-    require("./js/jquery.expose.js");
+    require("./js/jquery.expose.shimmed.js");
     main($, w)
 }, docPath, `trans_${docPath}`);
 

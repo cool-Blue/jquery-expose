@@ -31,6 +31,15 @@
   },
   "devDependencies": {
     "browserify": "^13.0.1",
-    "browserify-shim": "^3.8.12"
+    "browserify-shim": "^3.8.12",
+    "commonjsify": "^0.1.4",
+    "gulp": "^3.9.1",
+    "gulp-js-prettify": "^0.1.0",
+    "gulp-prettify": "^0.4.0",
+    "gulp-util": "^3.0.7",
+    "jsdoc": "^3.4.0",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0",
+    "shimwindow": "^1.0.0"
   }
 }
